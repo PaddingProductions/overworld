@@ -13,7 +13,7 @@ ctx.fillstyle = '#000000';
 let speed = 15;
 
 //num of px(on screen) in a px(on game)
-const pxNum = 5;
+const PX_NUM = 5;
 
 const BGsizex = 1200;
 const BGsizey = 750;
@@ -22,16 +22,16 @@ const centerX = BGsizex / 2;
 const centerY = BGsizey / 2;
 
 // which frame it's on
-let frameNum = 0;
+let g_frameNum = 0;
 
-let swordFrame = -1;
+let g_swordFrame = -1;
 //images
 
 //'game' = moving backgound and stuff
 //'loading' = what do u think
 //'start?' = titleScreen shown, if start(unicode 13) is pressed,
 //  then go to game
-let BGstats = 'loading';
+let g_BGstats = 'loading';
 
 //moves
 const linkUp = document.getElementById("playerUp");
@@ -140,7 +140,7 @@ const handleKeyUp = e => {
 
 	currentKey[83] = 0;
 	currentKey[13] = 0;
-	frameNum = 0;
+	g_frameNum = 0;
 }
 
 // when button down sets the unicode to the button pressed.
@@ -148,172 +148,118 @@ const handleKeyDown = e => {
 	currentKey[e.keyCode] = 1;
 	// up = p left = l right = ' down = ;'
 	if (e.keyCode === 83)
-		swordFrame = 0;
+		g_swordFrame = 0;
 
-};
-
-//draws the spawnPoint + the amount of buttons pressed
-const drawBG = () => {
-
-	if (BGstats === 'game') {
-		imgx = spawnPointx * pxNum + playerX;
-		imgy = spawnPointy * pxNum + playerY;
-
-
-		//draw the bounderies skin first.
-		Bctx.drawImage(bounderies, imgx, imgy,
-			4109 * pxNum, 4110 * pxNum);
-
-		ctx.drawImage(background, imgx, imgy,
-			4109 * pxNum, 4110 * pxNum);
-	} else {
-		return;
-	}
-};
-
-const startScreen = () => {
-	ctx.drawImage(titleScreen, 0, 0, BGsizex, BGsizey);
-	BGstats = 'start?';
-};
-
-//calls every 33 milliseconds 
-//reacts to the buttons you are pressing.
-const mainLoop = () => {
-	console.log(BGstats)
-	if (BGstats === 'game') {
-
-		let lastPlayerX = playerX;
-		let lastPlayerY = playerY;
-		console.log(playerX);
-		//left
-		if (currentKey[76] === 1) {
-			playerX += speed;
-			direct = 3;
-			frameNum += 1;
-			if (frameNum > 9 - 1) { frameNum = 0 }
-		}
-		// right
-		if (currentKey[222] === 1) {
-			playerX -= speed;
-			direct = 4;
-			frameNum += 1;
-			if (frameNum > 9 - 1) { frameNum = 0 }
-		}
-		//up
-		if (currentKey[80] === 1) {
-			playerY += speed;
-			direct = 1;
-			frameNum += 1;
-			if (frameNum > 9 - 1) { frameNum = 0 }
-		}
-		// down
-		if (currentKey[186] === 1) {
-			playerY -= speed;
-			direct = 2;
-			frameNum += 1;
-			if (frameNum > 9 - 1) { frameNum = 0 }
-		}
-
-		drawBG();
-		if (boundCheck() == false) {
-			playerX = lastPlayerX;
-			playerY = lastPlayerY;
-			drawBG();
-		}
-
-		drawPlayer();
-		drawShield();
-		drawSword();
-
-	}
-
-	//start
-	if (BGstats === 'start?') {
-		startScreen();
+	if (g_BGstats === 'start?') {
 		if (currentKey[13] === 1) {
-			BGstats = 'game';
+			g_BGstats = 'game';
 		}
 	}
-	if (BGstats === 'loading') {
-        writeWord('loading', 600, 600)
+	//left
+	if (currentKey[76] === 1) {
+		playerX += speed;
+		direct = 3;
+		g_frameNum += 1;
+		if (g_frameNum > 9 - 1) { g_frameNum = 0 }
 	}
-}
+	// right
+	if (currentKey[222] === 1) {
+		playerX -= speed;
+		direct = 4;
+		g_frameNum += 1;
+		if (g_frameNum > 9 - 1) { g_frameNum = 0 }
+	}
+	//up
+	if (currentKey[80] === 1) {
+		playerY += speed;
+		direct = 1;
+		g_frameNum += 1;
+		if (g_frameNum > 9 - 1) { g_frameNum = 0 }
+	}
+	// down
+	if (currentKey[186] === 1) {
+		playerY -= speed;
+		direct = 2;
+		g_frameNum += 1;
+		if (g_frameNum > 9 - 1) { g_frameNum = 0 }
+	}
 
+};
 const drawPlayer = () => {
 	//left
 	if (direct === 3) {
 		// the - 17*pxNum/2 part is because the image
 		// is being drawn on the top left coner
-		imgx = centerX - 17 * pxNum / 2;
-		imgy = centerY - 25 * pxNum / 2;
+		imgx = centerX - 17 * PX_NUM / 2;
+		imgy = centerY - 25 * PX_NUM / 2;
 		// total - (size of each frame)*framenum
-		if (swordFrame === -1) {
-			ctx.drawImage(linkLeft, 160 - (17 + 1) * (frameNum + 1),
-				1, 17, 25, imgx, imgy, 17 * pxNum, 25 * pxNum);
+		if (g_swordFrame === -1) {
+			ctx.drawImage(linkLeft, 160 - (17 + 1) * (g_frameNum + 1),
+				1, 17, 25, imgx, imgy, 17 * PX_NUM, 25 * PX_NUM);
 			return;
 		}
-		imgx = centerX - 23 * pxNum / 2;
-		imgy = centerY - 23 * pxNum / 2;
-		if (swordFrame < 5) {
-			ctx.drawImage(swordswingLeft, 121 - (23 + 1) * (swordFrame + 1),
-				1, 23, 23, imgx, imgy, 23 * pxNum, 23 * pxNum);
+		imgx = centerX - 23 * PX_NUM / 2;
+		imgy = centerY - 23 * PX_NUM / 2;
+		if (g_swordFrame < 5) {
+			ctx.drawImage(swordswingLeft, 121 - (23 + 1) * (g_swordFrame + 1),
+				1, 23, 23, imgx, imgy, 23 * PX_NUM, 23 * PX_NUM);
 		} else {
-			ctx.drawImage(swordswingLeft, 1, 1, 23, 23, imgx, imgy, 23 * pxNum, 23 * pxNum);
+			ctx.drawImage(swordswingLeft, 1, 1, 23, 23, imgx, imgy, 23 * PX_NUM, 23 * PX_NUM);
 		}
 	}
 	// right
 	if (direct === 4) {
-		imgx = centerX - 17 * pxNum / 2;
-		imgy = centerY - 25 * pxNum / 2;
+		imgx = centerX - 17 * PX_NUM / 2;
+		imgy = centerY - 25 * PX_NUM / 2;
 
-		if (swordFrame === -1) {
-			ctx.drawImage(linkRight, (17 * frameNum) + (1 * frameNum) + 1,
-				1, 16, 25, imgx, imgy, 16 * pxNum, 25 * pxNum);
+		if (g_swordFrame === -1) {
+			ctx.drawImage(linkRight, (17 * g_frameNum) + (1 * g_frameNum) + 1,
+				1, 16, 25, imgx, imgy, 16 * PX_NUM, 25 * PX_NUM);
 			return;
-		} else if (swordFrame) {
-			ctx.drawImage(swordswingRight, (23 * frameNum) + (1 * frameNum) + 1,
-				1, 23, 23, imgx, imgy, 23 * pxNum, 23 * pxNum);
+		} else if (g_swordFrame) {
+			ctx.drawImage(swordswingRight, (23 * g_frameNum) + (1 * g_frameNum) + 1,
+				1, 23, 23, imgx, imgy, 23 * PX_NUM, 23 * PX_NUM);
 		} else {
 			ctx.drawImage(swordswingRight, 97, 1, 23, 23, imgx, imgy,
-				23 * pxNum, 23 * pxNum);
+				23 * PX_NUM, 23 * PX_NUM);
 		}
 	}
 	//up
 	if (direct === 1) {
-		imgx = centerX - 16 * pxNum / 2;
-		imgy = centerY - 26 * pxNum / 2;
+		imgx = centerX - 16 * PX_NUM / 2;
+		imgy = centerY - 26 * PX_NUM / 2;
 
-		if (swordFrame === -1) {
-			ctx.drawImage(linkUp, (16 * frameNum) + (1 * frameNum) + 1,
+		if (g_swordFrame === -1) {
+			ctx.drawImage(linkUp, (16 * g_frameNum) + (1 * g_frameNum) + 1,
 				1, 16, 26,
-				imgx, imgy, 16 * pxNum, 26 * pxNum);
+				imgx, imgy, 16 * PX_NUM, 26 * PX_NUM);
 			return;
-		} else if (swordFrame < 5) {
-			ctx.drawImage(swordswingUp, (16 * swordFrame) + (1 * swordFrame) + 1,
-				1, 16, 29, imgx, imgy, 16 * pxNum, 29 * pxNum);
+		} else if (g_swordFrame < 5) {
+			ctx.drawImage(swordswingUp, (16 * g_swordFrame) + (1 * g_swordFrame) + 1,
+				1, 16, 29, imgx, imgy, 16 * PX_NUM, 29 * PX_NUM);
 		} else {
 			ctx.drawImage(swordswingUp, 69, 1, 16, 29, imgx, imgy,
-				16 * pxNum, 29 * pxNum);
+				16 * PX_NUM, 29 * PX_NUM);
 		}
 	}
 	// down
 	if (direct === 2) {
-		imgx = centerX - 16 * pxNum / 2;
-		imgy = centerY - 26 * pxNum / 2;
+		imgx = centerX - 16 * PX_NUM / 2;
+		imgy = centerY - 26 * PX_NUM / 2;
 		//width * frame num + 1(gap between the frames) * 
 		// frame num + 1 (becuase if the frame num = 0 it's
 		// not going to add the 1
-		if (swordFrame === -1) {
-			ctx.drawImage(linkDown, (16 * frameNum) + (1 * frameNum) + 1,
-				1, 16, 26, imgx, imgy, 16 * pxNum, 26 * pxNum);
-		} else if (swordFrame > 5) {
-			imgx = centerX - 16 * pxNum / 2;
-			imgy = centerY - 24 * pxNum / 2;
-			ctx.drawImage(swordswingDown, (16 * frameNum) + (1 * frameNum) + 1,
-				1, 16, 24, imgx, imgy, 16 * pxNum, 24 * pxNum);
+		if (g_swordFrame === -1) {
+			ctx.drawImage(linkDown, (16 * g_frameNum) + (1 * g_frameNum) + 1,
+				1, 16, 26, imgx, imgy, 16 * PX_NUM, 26 * PX_NUM);
+		} else if (g_swordFrame > 5) {
+			imgx = centerX - 16 * PX_NUM / 2;
+			imgy = centerY - 24 * PX_NUM / 2;
+			ctx.drawImage(swordswingDown, (16 * g_frameNum) + (1 * g_frameNum) + 1,
+				1, 16, 24, imgx, imgy, 16 * PX_NUM, 24 * PX_NUM);
 		} else {
 			ctx.drawImage(swordswingDown, 69, 1, 16, 24,
-				imgx, imgy, 16 * pxNum, 24 * pxNum);
+				imgx, imgy, 16 * PX_NUM, 24 * PX_NUM);
 		}
 
 	}
@@ -324,41 +270,41 @@ const drawShield = () => {
 	switch (direct) {
 		// 1 = up 2 = down 3 = left 4 = right
 		case 1:
-			if (swordFrame > -1) {
-				imgx += 9 * pxNum;
-				imgy += 5 * pxNum;
+			if (g_swordFrame > -1) {
+				imgx += 9 * PX_NUM;
+				imgy += 5 * PX_NUM;
 				ctx.drawImage(shield, 35, 1, 16, 16, imgx, imgy,
-					16 * pxNum, 16 * pxNum);
+					16 * PX_NUM, 16 * PX_NUM);
 			}
 			break;
 		case 2:
-			if (swordFrame === -1) {
-				imgx += -4 * pxNum;
-				imgy += 10 * pxNum;
+			if (g_swordFrame === -1) {
+				imgx += -4 * PX_NUM;
+				imgy += 10 * PX_NUM;
 				ctx.drawImage(shield, 18, 1, 16, 16, imgx, imgy,
-					16 * pxNum, 16 * pxNum);
+					16 * PX_NUM, 16 * PX_NUM);
 			} else {
-				imgx -= 10 * pxNum;
-				imgy += 5 * pxNum;
+				imgx -= 10 * PX_NUM;
+				imgy += 5 * PX_NUM;
 				ctx.drawImage(shield, 1, 1, 16, 16, imgx, imgy,
-					16 * pxNum, 16 * pxNum);
+					16 * PX_NUM, 16 * PX_NUM);
 			}
 			break;
 		case 3:
-			if (swordFrame === -1) {
-				imgx -= 5 * pxNum;
-				imgy += 5 * pxNum;
+			if (g_swordFrame === -1) {
+				imgx -= 5 * PX_NUM;
+				imgy += 5 * PX_NUM;
 				ctx.drawImage(shield, 1, 1, 16, 16, imgx, imgy,
-					16 * pxNum, 16 * pxNum);
+					16 * PX_NUM, 16 * PX_NUM);
 			}
 			break;
 
 		case 4:
-			if (swordFrame === -1) {
-				imgx += 9 * pxNum;
-				imgy += 5 * pxNum;
+			if (g_swordFrame === -1) {
+				imgx += 9 * PX_NUM;
+				imgy += 5 * PX_NUM;
 				ctx.drawImage(shield, 35, 1, 16, 16, imgx, imgy,
-					16 * pxNum, 16 * pxNum);
+					16 * PX_NUM, 16 * PX_NUM);
 			}
 			break;
 	}
@@ -367,7 +313,7 @@ const drawShield = () => {
 //draws the sword when the "s" button is pressed
 const drawSword = () => {
 
-	if (swordFrame === -1)
+	if (g_swordFrame === -1)
 		return;
 	handleKeyUp();
 	currentKey[83] = 1;
@@ -376,44 +322,97 @@ const drawSword = () => {
 		case 1:
 			imgx = centerX - 100;
 			imgy = centerY - 60;
-			ctx.drawImage(swordUp, 120 - (16 + 1) * (swordFrame + 1), 1, 16, 16, imgx, imgy,
-				16 * pxNum, 16 * pxNum);
-			swordFrame += 1;
-			if (swordFrame > 7)
-				swordFrame = -1;
+			ctx.drawImage(swordUp, 120 - (16 + 1) * (g_swordFrame + 1), 1, 16, 16, imgx, imgy,
+				16 * PX_NUM, 16 * PX_NUM);
+			g_swordFrame += 1;
+			if (g_swordFrame > 7)
+				g_swordFrame = -1;
 			drawPlayer();
 			break;
 		case 2:
 			//down
 			imgx = centerX + 20;
 			imgy = centerY + 10;
-			ctx.drawImage(swordDown, (16 + 1) * (swordFrame + 1), 1, 16, 16, imgx, imgy,
-				16 * pxNum, 16 * pxNum);
-			swordFrame += 1;
-			if (swordFrame > 7)
-				swordFrame = -1;
+			ctx.drawImage(swordDown, (16 + 1) * (g_swordFrame + 1), 1, 16, 16, imgx, imgy,
+				16 * PX_NUM, 16 * PX_NUM);
+			g_swordFrame += 1;
+			if (g_swordFrame > 7)
+				g_swordFrame = -1;
 			break;
 		case 3:
 			//left
 			imgx = centerX - 100;
 			imgy = centerY - 20;
-			ctx.drawImage(swordLeft, 1, ((16 * swordFrame) + (1 * (swordFrame + 1))),
-				16, 16, imgx, imgy, 16 * pxNum, 16 * pxNum);
-			swordFrame += 1;
-			if (swordFrame > 7)
-				swordFrame = -1;
+			ctx.drawImage(swordLeft, 1, ((16 * g_swordFrame) + (1 * (g_swordFrame + 1))),
+				16, 16, imgx, imgy, 16 * PX_NUM, 16 * PX_NUM);
+			g_swordFrame += 1;
+			if (g_swordFrame > 7)
+				g_swordFrame = -1;
 			break;
 		case 4:
 			//right
 			imgx = centerX + 20;
 			imgy = centerY + 20;
-			ctx.drawImage(swordRight, 1, ((16 * swordFrame) + (1 * (swordFrame + 1))),
-				16, 16, imgx, imgy, 16 * pxNum, 16 * pxNum);
-			swordFrame += 1;
-			if (swordFrame > 7)
-				swordFrame = -1;
+			ctx.drawImage(swordRight, 1, ((16 * g_swordFrame) + (1 * (g_swordFrame + 1))),
+				16, 16, imgx, imgy, 16 * PX_NUM, 16 * PX_NUM);
+			g_swordFrame += 1;
+			if (g_swordFrame > 7)
+				g_swordFrame = -1;
 			break;
 			drawBG();
+	}
+}
+
+//draws the spawnPoint + the amount of buttons pressed
+const drawBG = () => {
+
+	switch (g_BGstats) {
+		case 'game':
+			imgx = spawnPointx * PX_NUM + playerX;
+			imgy = spawnPointy * PX_NUM + playerY;
+
+
+			//draw the bounderies skin first.	
+			Bctx.drawImage(bounderies, imgx, imgy,
+				4109 * PX_NUM, 4110 * PX_NUM);
+
+			ctx.drawImage(background, imgx, imgy,
+				4109 * PX_NUM, 4110 * PX_NUM);
+
+			drawPlayer();
+			drawShield();
+			drawSword();
+		break;
+
+		case 'start?':
+			ctx.drawImage(titleScreen, 0, 0, BGsizex, BGsizey);
+		break;
+
+		case 'loading':
+			writeWord('loading', 600, 600)
+		break;
+
+		default:
+		    console.log("SOMEHTING WRONG")
+	}
+};
+
+//calls every 33 milliseconds 
+//reacts to the buttons you are pressing.
+const mainLoop = () => {
+	//drawBG();
+    console.log(g_BGstats);
+	if (g_BGstats === 'game') {
+
+		let lastPlayerX = playerX;
+		let lastPlayerY = playerY;
+		
+		drawBG();
+		if (boundCheck() == false) {
+			playerX = lastPlayerX;
+			playerY = lastPlayerY;
+			drawBG();
+		}
 	}
 }
 
@@ -432,15 +431,17 @@ const boundCheck = () => {
 const writeWord = (words, posx, posy) => {
 	for (i = 0; i < words.length; i++) {
 		var letter = words.charAt(i);
-		imgx = posx + (8 * i) * pxNum;
+		imgx = posx + (8 * i) * PX_NUM;
 		imgy = posy;
 		console.log(imgx);
 		console.log(letterList[letter]);
-		ctx.drawImage(letterList[letter], imgx, imgy, 8 * pxNum, 8 * pxNum);
+		ctx.drawImage(letterList[letter], imgx, imgy, 8 * PX_NUM, 8 * PX_NUM);
 	}
 }
 
-setTimeout(startScreen,10000)
+setTimeout(()=>{
+	g_BGstats = 'start?'
+},10000)
 // key down and keyup listeners
 document.addEventListener("keydown", handleKeyDown);
 document.addEventListener("keyup", handleKeyUp);
