@@ -49,7 +49,7 @@ const swordLeft = document.getElementById("sword left");
 const swordRight = document.getElementById("sword right");
 
 //BG
-const bounderies = document.getElementById("bounderies");
+const boundaries = document.getElementById("boundaries");
 const background = document.getElementById("background");
 const titleScreen = document.getElementById("title screen");
 
@@ -155,36 +155,8 @@ const handleKeyDown = e => {
 			g_BGstats = 'game';
 		}
 	}
-	//left
-	if (currentKey[76] === 1) {
-		playerX += speed;
-		direct = 3;
-		g_frameNum += 1;
-		if (g_frameNum > 9 - 1) { g_frameNum = 0 }
-	}
-	// right
-	if (currentKey[222] === 1) {
-		playerX -= speed;
-		direct = 4;
-		g_frameNum += 1;
-		if (g_frameNum > 9 - 1) { g_frameNum = 0 }
-	}
-	//up
-	if (currentKey[80] === 1) {
-		playerY += speed;
-		direct = 1;
-		g_frameNum += 1;
-		if (g_frameNum > 9 - 1) { g_frameNum = 0 }
-	}
-	// down
-	if (currentKey[186] === 1) {
-		playerY -= speed;
-		direct = 2;
-		g_frameNum += 1;
-		if (g_frameNum > 9 - 1) { g_frameNum = 0 }
-	}
-
 };
+
 const drawPlayer = () => {
 	//left
 	if (direct === 3) {
@@ -263,7 +235,7 @@ const drawPlayer = () => {
 		}
 
 	}
-}
+};
 
 //draws the sheild, called every time main loop is called
 const drawShield = () => {
@@ -308,7 +280,7 @@ const drawShield = () => {
 			}
 			break;
 	}
-}
+};
 
 //draws the sword when the "s" button is pressed
 const drawSword = () => {
@@ -361,24 +333,35 @@ const drawSword = () => {
 			break;
 			drawBG();
 	}
-}
+};
 
 //draws the spawnPoint + the amount of buttons pressed
 const drawBG = () => {
 
+
 	switch (g_BGstats) {
 		case 'game':
+		    /*
+			Bctx.fillStyle = "#000";
+			Bctx.fillRect(0,0, 1200, 750);
+	
+			ctx.fillStyle = "#000";
+			ctx.fillRect(0,0, 1200, 750);
+			*/
 			imgx = spawnPointx * PX_NUM + playerX;
 			imgy = spawnPointy * PX_NUM + playerY;
 
 
 			//draw the bounderies skin first.	
-			Bctx.drawImage(bounderies, imgx, imgy,
+			Bctx.drawImage(boundaries, imgx, imgy,
 				4109 * PX_NUM, 4110 * PX_NUM);
 
 			ctx.drawImage(background, imgx, imgy,
 				4109 * PX_NUM, 4110 * PX_NUM);
-
+/*
+			ctx.drawImage(boundaries, imgx, imgy,
+				4109 * PX_NUM, 4110 * PX_NUM);
+*/
 			drawPlayer();
 			drawShield();
 			drawSword();
@@ -400,29 +383,60 @@ const drawBG = () => {
 //calls every 33 milliseconds 
 //reacts to the buttons you are pressing.
 const mainLoop = () => {
-	//drawBG();
-    console.log(g_BGstats);
-	if (g_BGstats === 'game') {
+	let lastPlayerX = playerX;
+	let lastPlayerY = playerY;
 
-		let lastPlayerX = playerX;
-		let lastPlayerY = playerY;
-		
-		drawBG();
-		if (boundCheck() == false) {
+	if (g_BGstats === 'game') {
+		//left
+		if (currentKey[76] === 1) {
+			playerX += speed;
+			direct = 3;
+			g_frameNum += 1;
+			if (g_frameNum > 9 - 1) { g_frameNum = 0 }
+		}
+		// right
+		if (currentKey[222] === 1) {
+			playerX -= speed;
+			direct = 4;
+			g_frameNum += 1;
+			if (g_frameNum > 9 - 1) { g_frameNum = 0 }
+		}
+		//up
+		if (currentKey[80] === 1) {
+			playerY += speed;
+			direct = 1;
+			g_frameNum += 1;
+			if (g_frameNum > 9 - 1) { g_frameNum = 0 }
+		}
+		// down
+		if (currentKey[186] === 1) {
+			playerY -= speed;
+			direct = 2;
+			g_frameNum += 1;
+			if (g_frameNum > 9 - 1) { g_frameNum = 0 }
+		}
+	}
+
+	drawBG();
+
+    if (playerX != lastPlayerX ||
+		playerY != lastPlayerY) {
+  		if (!boundCheck()) {
 			playerX = lastPlayerX;
 			playerY = lastPlayerY;
 			drawBG();
 		}
 	}
-}
+};
 
 // called every time after main loop is called
 // it will check the position of the player and if the position
 // color is red, then it means that you can't cross that part
 const boundCheck = () => {
 	var imgData = Bctx.getImageData(centerX, centerY, 1, 1);
-
+    console.log(imgData.data[0]);
 	if (imgData.data[0] == 255) {
+
 		return false;
 	}
 	return true;
@@ -433,11 +447,9 @@ const writeWord = (words, posx, posy) => {
 		var letter = words.charAt(i);
 		imgx = posx + (8 * i) * PX_NUM;
 		imgy = posy;
-		console.log(imgx);
-		console.log(letterList[letter]);
 		ctx.drawImage(letterList[letter], imgx, imgy, 8 * PX_NUM, 8 * PX_NUM);
 	}
-}
+};
 
 setTimeout(()=>{
 	g_BGstats = 'start?'
