@@ -21,10 +21,18 @@ const BGsizey = 750;
 const centerX = BGsizex / 2;
 const centerY = BGsizey / 2;
 
-// which frame it's on
+// which frame it's on (enemy appear animation)
+let appearFrame = 0;
+
+// which frame it's on (walking animation)
 let g_frameNum = 0;
 
+// which frame the sword swing is on
 let g_swordFrame = -1;
+
+// percentage chance of enemy appearence every second
+const enemyAppearencePerSecond = 10;
+
 //images
 
 //'game' = moving backgound and stuff
@@ -125,6 +133,15 @@ var currentKey = {
 	'100': false,
 
 };
+
+// called when battle starts
+// makes the area allowed to draw smaller and smaller untill it is completely gone
+const startBattle = () => {
+	ctx.beginPath();
+	ctx.arc(600,375,(1200 - appearFrame*30)/2,0, Math.PI*2, true);
+	ctx.clip();
+    appearFrame += 1;
+}
 
 // when button uo it resets the unicode number to Null.
 const handleKeyUp = e => {
@@ -340,14 +357,17 @@ const drawBG = () => {
 
 
 	switch (g_BGstats) {
+		case 'loading':
+			writeWord('loading', 900, 700)
+		break;
+
+		case 'start?':
+			ctx.drawImage(titleScreen, 0, 0, BGsizex, BGsizey);
+		break;
+
 		case 'game':
-		    /*
-			Bctx.fillStyle = "#000";
-			Bctx.fillRect(0,0, 1200, 750);
-	
-			ctx.fillStyle = "#000";
-			ctx.fillRect(0,0, 1200, 750);
-			*/
+			
+		    
 			imgx = spawnPointx * PX_NUM + playerX;
 			imgy = spawnPointy * PX_NUM + playerY;
 
@@ -358,22 +378,35 @@ const drawBG = () => {
 
 			ctx.drawImage(background, imgx, imgy,
 				4109 * PX_NUM, 4110 * PX_NUM);
-/*
-			ctx.drawImage(boundaries, imgx, imgy,
-				4109 * PX_NUM, 4110 * PX_NUM);
-*/
+
 			drawPlayer();
 			drawShield();
 			drawSword();
 		break;
 
-		case 'start?':
-			ctx.drawImage(titleScreen, 0, 0, BGsizex, BGsizey);
-		break;
+		case 'fight':
+			ctx.save();
+			{
+				// fills the background black when it's cliped, it will only
+				// be seen on the outside of the circle.
+				ctx.fillStyle = '#000'
+				ctx.fillRect(0,0,BGsizex,BGsizey);
+			
+				startBattle();
 
-		case 'loading':
-			writeWord('loading', 600, 600)
-		break;
+				imgx = spawnPointx * PX_NUM + playerX;
+				imgy = spawnPointy * PX_NUM + playerY;
+
+				ctx.drawImage(background, imgx, imgy,
+					4109 * PX_NUM, 4110 * PX_NUM);
+
+				drawPlayer();
+				drawShield();
+
+			}
+			ctx.restore()
+        break;
+
 
 		default:
 		    console.log("SOMEHTING WRONG")
@@ -415,10 +448,16 @@ const mainLoop = () => {
 			g_frameNum += 1;
 			if (g_frameNum > 9 - 1) { g_frameNum = 0 }
 		}
+		// enemy detection
+		const random = Math.floor(Math.random()*100);
+		if (random <= enemyAppearencePerSecond) {
+			g_BGstats = 'fight';
+		}
 	}
 
 	drawBG();
 
+	// if you are in bounds
     if (playerX != lastPlayerX ||
 		playerY != lastPlayerY) {
   		if (!boundCheck()) {
@@ -427,6 +466,8 @@ const mainLoop = () => {
 			drawBG();
 		}
 	}
+
+
 };
 
 // called every time after main loop is called
