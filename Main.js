@@ -31,7 +31,7 @@ let g_frameNum = 0;
 let g_swordFrame = -1;
 
 // percentage chance of enemy appearence every second
-const enemyAppearencePerSecond = 10;
+const enemyAppearencePerSecond = 100;
 
 //images
 
@@ -183,8 +183,8 @@ const drawPlayer = () => {
 		imgy = centerY - 25 * PX_NUM / 2;
 		// total - (size of each frame)*framenum
 		if (g_swordFrame === -1) {
-			ctx.drawImage(linkLeft, 160 - (17 + 1) * (g_frameNum + 1),
-				1, 17, 25, imgx, imgy, 17 * PX_NUM, 25 * PX_NUM);
+			ctx.drawImage(linkLeft, 163 - (17 + 1) * (g_frameNum + 1),
+				1, 17, 23, imgx, imgy, 17 * PX_NUM, 23 * PX_NUM);
 			return;
 		}
 		imgx = centerX - 23 * PX_NUM / 2;
@@ -352,7 +352,6 @@ const drawSword = () => {
 	}
 };
 
-//draws the spawnPoint + the amount of buttons pressed
 const drawBG = () => {
 
 
@@ -366,8 +365,7 @@ const drawBG = () => {
 		break;
 
 		case 'game':
-			
-		    
+				
 			imgx = spawnPointx * PX_NUM + playerX;
 			imgy = spawnPointy * PX_NUM + playerY;
 
@@ -383,15 +381,36 @@ const drawBG = () => {
 			drawShield();
 			drawSword();
 		break;
+		
+		case 'surprise':
+							
+			imgx = spawnPointx * PX_NUM + playerX;
+			imgy = spawnPointy * PX_NUM + playerY;
 
+			ctx.drawImage(background, imgx, imgy,
+				4109 * PX_NUM, 4110 * PX_NUM);
+
+			drawPlayer();
+			drawShield();
+			ctx.drawImage(surprise, centerX-7*PX_NUM, centerY-15*PX_NUM, 15*PX_NUM, 15*PX_NUM);
+		break;
 		case 'fight':
 			ctx.save();
 			{
-				// fills the background black when it's cliped, it will only
+				// fills the background black or red when it's cliped, it will only
 				// be seen on the outside of the circle.
+           
 				ctx.fillStyle = '#000'
 				ctx.fillRect(0,0,BGsizex,BGsizey);
-			
+				
+				//screen flicing effect
+				ctx.fillStyle = '#f00'
+				if (appearFrame%6 < 3) {
+					ctx.fillRect(0,0,BGsizex/2,BGsizey);
+				} else {
+					ctx.fillRect(BGsizex/2 ,0,BGsizex/2,BGsizey);
+				}
+				   
 				startBattle();
 
 				imgx = spawnPointx * PX_NUM + playerX;
@@ -448,11 +467,7 @@ const mainLoop = () => {
 			g_frameNum += 1;
 			if (g_frameNum > 9 - 1) { g_frameNum = 0 }
 		}
-		// enemy detection
-		const random = Math.floor(Math.random()*100);
-		if (random <= enemyAppearencePerSecond) {
-			g_BGstats = 'fight';
-		}
+
 	}
 
 	drawBG();
@@ -499,4 +514,16 @@ setTimeout(()=>{
 document.addEventListener("keydown", handleKeyDown);
 document.addEventListener("keyup", handleKeyUp);
 
-var timer = setInterval(mainLoop, 33);
+setInterval(mainLoop, 66);
+setInterval(() => {
+	// enemy detection
+	const random = Math.floor(Math.random()*100);
+	if (random <= enemyAppearencePerSecond) {
+		g_BGstats = 'surprise';
+
+		setTimeout(()=> {
+    		g_BGstats = 'fight';
+		}, 2000)
+	}
+}, 1000);
+
